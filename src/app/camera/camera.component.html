@@ -1,0 +1,42 @@
+<h1>CAMARA</h1>
+<div class="container">
+  <!-- Cámara Polaroid -->
+  <section class="camera-section">
+    <div class="polaroid-camera">
+      <!-- Botón para tomar la foto -->
+      <button id="button" (click)="takePicture()"></button>
+      <!-- Círculo de luz (flash) -->
+      <div id="circle"></div>
+      <!-- Lente de la cámara -->
+      <div class="lens">
+        <div class="reflection"></div>
+      </div>
+      <!-- Flash -->
+      <div class="flash"></div>
+      <!-- Rayas decorativas -->
+      <div class="stripes"></div>
+      <!-- Parte inferior de la cámara -->
+      <div class="bottom">
+        <div class="bottom-front"></div>
+      </div>
+      <!-- Ranura para la foto -->
+      <div class="slot"></div>
+      <!-- Sombra -->
+      <div class="shadow"></div>
+
+      <!-- Foto capturada -->
+      <div id="photo" class="photo" *ngIf="showPhoto">
+        <img [src]="imgUrl" alt="Foto capturada">
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="stack">
+  <div class="card">
+    <div class="image" (click)="gotoGaleria()">
+      <img [src]="lastSavedImage" alt="Última foto capturada" class="fotico" *ngIf="lastSavedImage">
+      <p *ngIf="!lastSavedImage">No hay fotos guardadas</p>
+    </div>
+  </div>
+</div>
