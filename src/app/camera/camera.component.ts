@@ -5,7 +5,6 @@ import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-camera',
-  standalone: true,
   imports: [NgIf],
   templateUrl: './camera.component.html',
   styleUrls: ['./camera.component.css']

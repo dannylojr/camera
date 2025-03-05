@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Poor+Story&family=Press+Start+2P&display=swap');
 
 .button {
     position: fixed;
@@ -161,5 +160,11 @@ h1 {
 @media (max-width: 768px) {
   .item {
     width: 100%;
+  }
+
+  .button {
+    position: fixed;
+    top: 60px;
+    left: 20px;
   }
 }

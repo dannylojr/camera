@@ -32,7 +32,7 @@ export class CameraService {
       quality: 90,
       allowEditing: false,
       resultType: CameraResultType.Base64,
-      source: CameraSource.Photos
+      source: CameraSource.Camera
     });
 
     const base64Image = `data:image/jpeg;base64,${image.base64String}`;
