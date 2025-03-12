@@ -449,15 +449,38 @@ h1 {
 
 @media screen and (max-width: 480px) {
   .polaroid-camera {
+    top: 150px;
     transform: translate(-50%, -50%) scale(0.7);
   }
 
   .stack {
     position: absolute;
-    top: 750px;
+    top: 550px;
     left: 50%;
     max-width: 250px;
     transform: translate(-50%, -50%) scale(0.7);
+    transition: none;
+  }
+  
+  .stack:hover {
+    transform: translate(-50%, -50%) scale(0.7);
+  }
+  
+  .stack:hover .card:before {
+    transform: translatey(-2%) rotate(-6deg);
+  }
+  
+  .stack:hover .card:after {
+    transform: translatey(2%) rotate(6deg);
+  }
+  
+  .card {
+    transition: none;
+  }
+  
+  .card:before,
+  .card:after {
+    transition: none;
   }
 
   img{
@@ -470,7 +493,6 @@ h1 {
     top: 5px;
     max-width: 180px;
   }
-  
 }
 
 .botoncito {

@@ -26,9 +26,28 @@ export class GaleriaComponent {
 
   deleteImage(index: number) {
     this.cameraService.deleteImage(index);
-  } 
+  }
 
-  gotoCamera(){
+  gotoCamera() {
     this.route.navigateByUrl('/camera');
+  }
+
+  items!: NodeListOf<HTMLElement>; // Usamos el operador '!' para indicar que se inicializará más tarde
+
+  ngAfterViewInit(): void {
+    // Inicializa 'items' después de que la vista se haya inicializado
+    this.items = document.querySelectorAll('.item');
+    // Itera sobre cada elemento
+    this.items.forEach((item: HTMLElement): void => {
+      // Agrega un evento de clic a cada elemento
+      item.addEventListener('click', () => {
+        // Primero, elimina la clase 'selected' de todos los elementos
+        this.items.forEach((i: HTMLElement) => {
+          i.classList.remove('selected');
+        });
+        // Luego, agrega la clase 'selected' al elemento que fue clicado
+        item.classList.add('selected');
+      });
+    });
   }
 }
