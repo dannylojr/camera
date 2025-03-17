@@ -1,0 +1,36 @@
+<div class="linked-users-container">
+  <h2>Usuarios Enlazados</h2>
+
+  <div *ngIf="loading" class="loading-indicator">
+    <p>Cargando usuarios enlazados...</p>
+  </div>
+
+  <div *ngIf="errorMessage" class="error-message">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="!loading && linkedUsers.length === 0" class="no-users-message">
+    <p>No tienes usuarios enlazados en este momento.</p>
+    <button (click)="router.navigate(['/search-users'])" class="btn-primary">Buscar Usuarios</button>
+  </div>
+
+  <div *ngIf="linkedUsers.length > 0" class="user-list">
+    <div *ngFor="let user of linkedUsers" class="user-card">
+      <div class="user-avatar">
+        <img [src]="user.photoURL || 'assets/default-avatar.png'" alt="{{ user.displayName }}" />
+      </div>
+      <div class="user-info">
+        <h3>{{ user.displayName }}</h3>
+        <p *ngIf="user.email">{{ user.email }}</p>
+      </div>
+      <div class="user-actions">
+        <button (click)="navigateToSharedGallery(user.uid)" class="btn-unlink">galeria compartida</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="actions-container">
+    <button (click)="router.navigate(['/search-users'])" class="btn-primary">Buscar Más Usuarios</button>
+    <button (click)="router.navigate(['/dashboard'])" class="btn-secondary">Volver al Dashboard</button>
+  </div>
+</div>

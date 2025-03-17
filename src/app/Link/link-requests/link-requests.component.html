@@ -1,0 +1,81 @@
+<div class="link-requests-container">
+    <h2>Solicitudes de Enlace</h2>
+
+    <!-- Mensajes de éxito y error -->
+    <div *ngIf="successMessage" class="success-message">
+        {{ successMessage }}
+    </div>
+
+    <div *ngIf="errorMessage" class="error-message">
+        {{ errorMessage }}
+    </div>
+
+    <!-- Solicitudes Recibidas -->
+    <section class="requests-section">
+        <h3>Solicitudes Recibidas</h3>
+
+        <div *ngIf="loadingReceived" class="loading-indicator">
+            <p>Cargando solicitudes recibidas...</p>
+        </div>
+
+        <div *ngIf="!loadingReceived && receivedRequests.length === 0" class="empty-state">
+            <p>No tienes solicitudes pendientes.</p>
+        </div>
+
+        <div *ngIf="receivedRequests.length > 0" class="requests-list">
+            <div *ngFor="let request of receivedRequests" class="request-card">
+                <div class="request-avatar" (click)="navigateToUserProfile(request.senderId)">
+                    <img [src]="getUserPhoto(request.senderId)" alt="Foto de perfil">
+                </div>
+
+                <div class="request-details" (click)="navigateToUserProfile(request.senderId)">
+                    <h4>{{ getUserName(request.senderId) }}</h4>
+                    <p class="request-time">{{ getTimeAgo(request.createdAt) }}</p>
+                </div>
+
+                <div class="request-actions">
+                    <button class="btn-accept" (click)="acceptRequest(request)">Aceptar</button>
+                    <button class="btn-reject" (click)="rejectRequest(request)">Rechazar</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Solicitudes Enviadas -->
+    <section class="requests-section">
+        <h3>Solicitudes Enviadas</h3>
+
+        <div *ngIf="loadingSent" class="loading-indicator">
+            <p>Cargando solicitudes enviadas...</p>
+        </div>
+
+        <div *ngIf="!loadingSent && sentRequests.length === 0" class="empty-state">
+            <p>No has enviado solicitudes que estén pendientes.</p>
+        </div>
+
+        <div *ngIf="sentRequests.length > 0" class="requests-list">
+            <div *ngFor="let request of sentRequests" class="request-card">
+                <div class="request-avatar" (click)="navigateToUserProfile(request.recipientId)">
+                    <img [src]="getUserPhoto(request.recipientId)" alt="Foto de perfil">
+                </div>
+
+                <div class="request-details" (click)="navigateToUserProfile(request.recipientId)">
+                    <h4>{{ getUserName(request.recipientId) }}</h4>
+                    <p class="request-time">{{ getTimeAgo(request.createdAt) }}</p>
+                    <p class="status-pending">Pendiente</p>
+                </div>
+
+                <div class="request-actions">
+                    <button class="btn-cancel" (click)="cancelRequest(request)">Cancelar</button>
+                    <button class="btn-resend" (click)="resendRequest(request)">Reenviar</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="actions-container">
+        <button (click)="router.navigate(['/search-users'])" class="btn-primary">Buscar Usuarios</button>
+        <button (click)="router.navigate(['/linked-users'])" class="btn-secondary">Ver Usuarios Enlazados</button>
+        <button (click)="router.navigate(['/dashboard'])" class="btn-secondary">Dashboard</button>
+    </div>
+</div>

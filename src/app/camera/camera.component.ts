@@ -1,7 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { CameraService } from '../camera.service';
+import { CameraService } from '../Services/camera.service';
 import { NgIf } from '@angular/common';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-camera',
@@ -17,13 +17,15 @@ export class CameraComponent implements OnInit {
   loading: boolean = false; // Estado de carga
   images: string[] = []; // Almacena las imágenes capturadas
   showPhoto: boolean = false; // Controla si la foto se muestra
-  lastSavedImage: string = ''; // Última imagen guardada en localStorage
+  linkId: string | null = null; // Almacena el linkId
 
-  constructor() { }
+  constructor(private aroute: ActivatedRoute) { }
 
   ngOnInit() {
-    // Recuperar la última imagen guardada de localStorage
-    this.lastSavedImage = localStorage.getItem('lastCapturedImage') || '';
+    // Obtener el linkId de la ruta
+    this.aroute.paramMap.subscribe(params => {
+      this.linkId = params.get('id'); // Obtener el linkId de la ruta
+    });
   }
 
   async takePicture() {
@@ -44,10 +46,6 @@ export class CameraComponent implements OnInit {
       const newImage = await this.cameraService.takePicture();
       if (!newImage) throw new Error('No se obtuvo una imagen válida');
 
-      // Guardar la imagen en localStorage
-      localStorage.setItem('lastCapturedImage', newImage);
-      this.lastSavedImage = newImage;
-
       // Agregar la nueva imagen al inicio del array
       this.images.unshift(newImage);
       this.imgUrl = newImage; // Mostrar la última imagen capturada
@@ -62,12 +60,17 @@ export class CameraComponent implements OnInit {
             eject.classList.add('eject-photo');
           }, 10); // Pequeño retraso para reiniciar la animación
         }
-      }, 0);// Esperar un ciclo de detección de cambios de Angular
+      }, 0); // Esperar un ciclo de detección de cambios de Angular
 
       setTimeout(() => {
-        this.showPhoto = false; // Ocultar la foto después de 6 segundos
+        this.showPhoto = false; // Ocultar la foto después de 4 segundos
       }, 4000);
-      
+
+      // Compartir la foto con el usuario enlazado
+      if (this.linkId) {
+        await this.cameraService.captureAndSharePhoto(this.linkId, 'Descripción opcional').toPromise();
+      }
+
     } catch (error) {
       console.error('Error al capturar imagen:', error);
       this.errorMessage = String(error); // Mostrar mensaje de error
@@ -77,6 +80,11 @@ export class CameraComponent implements OnInit {
   }
 
   gotoGaleria() {
-    this.route.navigateByUrl('/galeria');
+    if (this.linkId) {
+      // Redirigir a la galería con el linkId
+      this.route.navigate(['/galeria', this.linkId]);
+    } else {
+      console.error('No se encontró el linkId para redirigir a la galería.');
+    }
   }
 }

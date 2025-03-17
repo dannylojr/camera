@@ -1,0 +1,249 @@
+/* Main container styling */
+.link-requests-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: 'Roboto', Arial, sans-serif;
+}
+
+.link-requests-container h2 {
+    color: #333;
+    margin-bottom: 24px;
+    font-size: 28px;
+    text-align: center;
+    border-bottom: 2px solid #f5f5f5;
+    padding-bottom: 15px;
+}
+
+/* Section styling */
+.requests-section {
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-bottom: 30px;
+}
+
+.requests-section h3 {
+    color: #444;
+    margin-bottom: 20px;
+    font-size: 20px;
+    border-bottom: 1px solid #eaeaea;
+    padding-bottom: 10px;
+}
+
+/* Message styling */
+.success-message {
+    background-color: #e5f7ed;
+    color: #0b6e4f;
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border-left: 4px solid #0b6e4f;
+}
+
+.error-message {
+    background-color: #ffebee;
+    color: #c62828;
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border-left: 4px solid #c62828;
+}
+
+/* Loading and empty states */
+.loading-indicator {
+    text-align: center;
+    color: #757575;
+    padding: 20px;
+}
+
+.empty-state {
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    color: #757575;
+}
+
+/* Request card styling */
+.requests-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.request-card {
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.request-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Avatar styling */
+.request-avatar {
+    margin-right: 15px;
+    cursor: pointer;
+}
+
+.request-avatar img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Request details styling */
+.request-details {
+    flex-grow: 1;
+    cursor: pointer;
+}
+
+.request-details h4 {
+    margin: 0 0 5px 0;
+    color: #333;
+    font-size: 16px;
+}
+
+.request-time {
+    color: #777;
+    font-size: 14px;
+    margin: 0;
+}
+
+.status-pending {
+    display: inline-block;
+    background-color: #fff3e0;
+    color: #ff9800;
+    font-size: 12px;
+    padding: 3px 8px;
+    border-radius: 12px;
+    margin-top: 5px;
+}
+
+/* Button styling */
+.request-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-accept,
+.btn-reject,
+.btn-cancel,
+.btn-resend {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-accept {
+    background-color: #4caf50;
+    color: white;
+}
+
+.btn-accept:hover {
+    background-color: #43a047;
+}
+
+.btn-reject,
+.btn-cancel {
+    background-color: #f44336;
+    color: white;
+}
+
+.btn-reject:hover,
+.btn-cancel:hover {
+    background-color: #e53935;
+}
+
+.btn-resend {
+    background-color: #2196f3;
+    color: white;
+}
+
+.btn-resend:hover {
+    background-color: #1e88e5;
+}
+
+/* Footer actions container */
+.actions-container {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+.btn-primary,
+.btn-secondary {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background-color: #3f51b5;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #303f9f;
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background-color: #f5f5f5;
+    color: #333;
+    border: 1px solid #ddd;
+}
+
+.btn-secondary:hover {
+    background-color: #e0e0e0;
+    transform: translateY(-2px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+    .request-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .request-avatar {
+        margin-right: 0;
+        margin-bottom: 10px;
+    }
+
+    .request-details {
+        width: 100%;
+        margin-bottom: 15px;
+    }
+
+    .request-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .actions-container {
+        flex-direction: column;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+        width: 100%;
+    }
+}

@@ -1,0 +1,47 @@
+<div class="link-people-container">
+  <div class="card">
+    <h2 class="card-title">Enlazar con otro usuario</h2>
+
+    <div class="form-group">
+      <label for="recipientEmail">Correo Electrónico</label>
+      <input type="email" id="recipientEmail" name="recipientEmail" [(ngModel)]="recipientEmail"
+        placeholder="Ingresa el correo del usuario a enlazar" class="form-control" [disabled]="loading">
+      <small class="form-hint">Introduce el correo electrónico del usuario que deseas enlazar contigo</small>
+    </div>
+
+    <!-- Mensaje de error -->
+    <div *ngIf="errorMessage" class="alert alert-danger">
+      {{ errorMessage }}
+    </div>
+
+    <!-- Mensaje de éxito -->
+    <div *ngIf="successMessage" class="alert alert-success">
+      {{ successMessage }}
+      <div class="spinner-border spinner-border-sm" role="status" *ngIf="loading">
+        <span class="visually-hidden">Redirigiendo...</span>
+      </div>
+    </div>
+
+    <div class="button-group">
+      <button (click)="sendLink()" class="btn btn-primary" [disabled]="loading || !recipientEmail">
+        <span *ngIf="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        {{ loading ? 'Procesando...' : 'Enlazar Usuario' }}
+      </button>
+
+      <button (click)="resetForm()" class="btn btn-secondary"
+        [disabled]="loading || (!recipientEmail && !errorMessage && !successMessage)">
+        Limpiar
+      </button>
+
+      <button (click)="viewLinkRequests()" class="btn btn-info" [disabled]="loading">
+        Ver Solicitudes
+      </button>
+    </div>
+
+    <div class="info-box">
+      <p><strong>¿Qué es un enlace?</strong></p>
+      <p>Al enlazar con otro usuario, ambos podrán compartir información y acceder a funcionalidades colaborativas.</p>
+      <p>El usuario receptor debe aceptar tu solicitud para establecer el enlace completo.</p>
+    </div>
+  </div>
+</div>
