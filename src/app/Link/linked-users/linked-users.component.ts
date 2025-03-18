@@ -1,53 +1,52 @@
-import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
-import { AuthService } from '../../Services/auth.service';
-import { LinkPeopleService } from '../../Services/link-people.service';
-import { NgFor, NgIf } from '@angular/common';
-import { User } from '../../Models/user.mode';
-import { getAuth, onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
+import { Component, OnInit, inject, OnDestroy } from "@angular/core";
+import { Router } from "@angular/router";
+import { AuthService } from "../../Services/auth.service";
+import { LinkPeopleService } from "../../Services/link-people.service";
+import { NgFor, NgIf, CommonModule } from "@angular/common";
+import { User } from "../../Models/user.mode";
+import { Subscription } from "rxjs";
 
 @Component({
-  selector: 'app-linked-users',
+  selector: "app-linked-users",
   standalone: true,
-  imports: [NgFor, NgIf],
-  templateUrl: './linked-users.component.html',
-  styleUrls: ['./linked-users.component.css']
+  imports: [CommonModule, NgFor, NgIf],
+  templateUrl: "./linked-users.component.html",
+  styleUrls: ["./linked-users.component.css"]
 })
-export class LinkedUsersComponent implements OnInit {
-  currentUser: FirebaseUser | null = null;
+export class LinkedUsersComponent implements OnInit, OnDestroy {
   linkedUsers: User[] = [];
-  errorMessage: string = '';
-  loading: boolean = false;
+  errorMessage: string = "";
+  successMessage: string = "";
+  loading: boolean = true;
 
-  constructor(
-    private authService: AuthService,
-    private linkService: LinkPeopleService,
-    public router: Router
-  ) { }
+  private subscriptions: Subscription[] = [];
+  private authService = inject(AuthService);
+  private linkService = inject(LinkPeopleService);
+  public router = inject(Router);
 
   ngOnInit() {
-    const auth = getAuth();
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        this.currentUser = user;
-        this.loadLinkedUsers();
-      } else {
-        this.router.navigate(['/login']);
+    // Verificar autenticación y cargar usuarios enlazados
+    const authSub = this.authService.user$.subscribe(user => {
+      if (!user) {
+        this.router.navigate(["/login"]);
+        return;
       }
+
+      this.loadLinkedUsers();
     });
+
+    this.subscriptions.push(authSub);
+  }
+
+  ngOnDestroy() {
+    // Limpiar todas las suscripciones
+    this.subscriptions.forEach(sub => sub.unsubscribe());
   }
 
   loadLinkedUsers() {
-    if (!this.currentUser) return;
-
-    this.loading = true;
-    this.linkService.getLinkedUser().subscribe({
+    const linkedSub = this.linkService.loadLinkedUsers().subscribe({
       next: (users) => {
-        if (Array.isArray(users)) {
-          this.linkedUsers = users;
-        } else {
-          this.linkedUsers = [];
-        }
+        this.linkedUsers = users;
         this.loading = false;
       },
       error: (error) => {
@@ -55,22 +54,34 @@ export class LinkedUsersComponent implements OnInit {
         this.loading = false;
       }
     });
+
+    this.subscriptions.push(linkedSub);
+  }
+
+  unlinkUser(userId: string) {
+    this.loading = true;
+
+    const unlinkSub = this.linkService.unlinkUser(userId).subscribe({
+      next: () => {
+        this.successMessage = "Usuario desenlazado correctamente";
+        this.linkedUsers = this.linkedUsers.filter(user => user.uid !== userId);
+        this.loading = false;
+
+        // Ocultar el mensaje después de 3 segundos
+        setTimeout(() => {
+          this.successMessage = "";
+        }, 3000);
+      },
+      error: (error) => {
+        this.errorMessage = `Error al desenlazar usuario: ${error.message}`;
+        this.loading = false;
+      }
+    });
+
+    this.subscriptions.push(unlinkSub);
   }
 
   navigateToSharedGallery(userId: string) {
-    if (!this.currentUser) return;
-
-    this.linkService.getLinkedUser().subscribe({
-      next: (linkId) => {
-        if (linkId) {
-          this.router.navigate(['/galeria', linkId]);
-        } else {
-          console.error('No se encontró el linkId para el usuario:', userId);
-        }
-      },
-      error: (error: any) => {
-        console.error('Error al obtener el linkId:', error);
-      }
-    });
+    this.router.navigate(["/galeria", userId]);
   }
 }

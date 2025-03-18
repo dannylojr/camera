@@ -15,10 +15,12 @@
         <h3>Solicitudes Recibidas</h3>
 
         <div *ngIf="loadingReceived" class="loading-indicator">
+            <div class="spinner"></div>
             <p>Cargando solicitudes recibidas...</p>
         </div>
 
         <div *ngIf="!loadingReceived && receivedRequests.length === 0" class="empty-state">
+            <div class="empty-icon">📭</div>
             <p>No tienes solicitudes pendientes.</p>
         </div>
 
@@ -46,10 +48,12 @@
         <h3>Solicitudes Enviadas</h3>
 
         <div *ngIf="loadingSent" class="loading-indicator">
+            <div class="spinner"></div>
             <p>Cargando solicitudes enviadas...</p>
         </div>
 
         <div *ngIf="!loadingSent && sentRequests.length === 0" class="empty-state">
+            <div class="empty-icon">📤</div>
             <p>No has enviado solicitudes que estén pendientes.</p>
         </div>
 
@@ -74,7 +78,7 @@
     </section>
 
     <div class="actions-container">
-        <button (click)="router.navigate(['/search-users'])" class="btn-primary">Buscar Usuarios</button>
+        <button (click)="router.navigate(['/link-people'])" class="btn-primary">Enlazar Usuarios</button>
         <button (click)="router.navigate(['/linked-users'])" class="btn-secondary">Ver Usuarios Enlazados</button>
         <button (click)="router.navigate(['/dashboard'])" class="btn-secondary">Dashboard</button>
     </div>
