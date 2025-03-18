@@ -21,7 +21,7 @@ import {
 } from "firebase/firestore"
 import { initializeApp } from "firebase/app"
 import { firebaseConfig } from "../../environments/firebase-config"
-import { LinkedRequests } from "../Models/link-requests"
+import type { LinkedRequests } from "../Models/link-requests"
 
 @Injectable({
   providedIn: "root",
@@ -100,6 +100,99 @@ export class LinkPeopleService {
   }
 
   /**
+   * Creates a link between two users if they aren't already linked
+   * @param userId The ID of the user initiating the link
+   * @param targetUserId The ID of the user to link with
+   * @returns Result object with success status and message
+   */
+  sendLinkRequest(recipientId: string): Observable<string> {
+    return this.authService.user$.pipe(
+      switchMap((user) => {
+        if (!user) {
+          return throwError(() => new Error("No hay usuario autenticado"))
+        }
+
+        // Verificar si ya existe una solicitud pendiente o si ya están enlazados
+        return this.checkExistingLinkOrRequest(user.uid, recipientId).pipe(
+          switchMap((result) => {
+            if (result.existsRequest) {
+              return throwError(() => new Error("Ya existe una solicitud pendiente con este usuario"))
+            }
+
+            if (result.existsLink) {
+              return throwError(() => new Error("Ya estás enlazado con este usuario"))
+            }
+
+            // Crear la nueva solicitud
+            const linkRequest: LinkedRequests = {
+              senderId: user.uid,
+              recipientId: recipientId,
+              status: "pending",
+              createdAt: new Date(),
+            }
+
+            return from(addDoc(collection(this.firestore, "linkRequests"), linkRequest)).pipe(
+              map((docRef) => docRef.id),
+            )
+          }),
+        )
+      }),
+      catchError((error) => {
+        console.error("Error al enviar solicitud de enlace:", error)
+        return throwError(() => error)
+      }),
+    )
+  }
+
+  /**
+   * Verifica si ya existe una solicitud o enlace entre dos usuarios
+   */
+  private checkExistingLinkOrRequest(
+    userId: string,
+    targetUserId: string,
+  ): Observable<{ existsRequest: boolean; existsLink: boolean }> {
+    // Check for pending requests
+    const requestsRef = collection(this.firestore, "linkRequests")
+    const q1 = query(
+      requestsRef,
+      where("senderId", "==", userId),
+      where("recipientId", "==", targetUserId),
+      where("status", "==", "pending"),
+    )
+
+    const q2 = query(
+      requestsRef,
+      where("senderId", "==", targetUserId),
+      where("recipientId", "==", userId),
+      where("status", "==", "pending"),
+    )
+
+    // Check for existing links
+    const linkedUsersRef = collection(this.firestore, "linkedUsers")
+    const q3 = query(
+      linkedUsersRef,
+      where("senderId", "==", userId),
+      where("recipientId", "==", targetUserId),
+      where("status", "==", "accepted"),
+    )
+
+    const q4 = query(
+      linkedUsersRef,
+      where("senderId", "==", targetUserId),
+      where("recipientId", "==", userId),
+      where("status", "==", "accepted"),
+    )
+
+    return from(Promise.all([getDocs(q1), getDocs(q2), getDocs(q3), getDocs(q4)])).pipe(
+      map(([snapshot1, snapshot2, snapshot3, snapshot4]) => {
+        const existsRequest = !snapshot1.empty || !snapshot2.empty
+        const existsLink = !snapshot3.empty || !snapshot4.empty
+        return { existsRequest, existsLink }
+      }),
+    )
+  }
+
+  /**
    * Busca un usuario por su correo electrónico
    */
   getUserIdByEmail(email: string): Observable<string | null> {
@@ -121,6 +214,7 @@ export class LinkPeopleService {
   /**
    * Envía una solicitud de enlace a otro usuario
    */
+  /*
   sendLinkRequest(recipientId: string): Observable<string> {
     return this.authService.user$.pipe(
       switchMap((user) => {
@@ -155,6 +249,7 @@ export class LinkPeopleService {
       }),
     )
   }
+  */
 
   /**
    * Verifica si ya existe una solicitud entre dos usuarios
@@ -338,7 +433,7 @@ export class LinkPeopleService {
         )
       }),
       catchError((error) => {
-        console.error("Error al cargar usuarios enlazados:", error)
+        console.error("Error al cargar usuarios :", error)
         return of([])
       }),
       tap((users) => {
@@ -423,3 +518,4 @@ export class LinkPeopleService {
     )
   }
 }
+

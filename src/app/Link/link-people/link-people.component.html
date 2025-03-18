@@ -1,47 +1,42 @@
 <div class="link-people-container">
-  <div class="card">
-    <h2 class="card-title">Enlazar con otro usuario</h2>
-
+  <h2>Enviar solicitud de enlace</h2>
+  
+  <form (ngSubmit)="onSubmit()" #linkForm="ngForm">
     <div class="form-group">
-      <label for="recipientEmail">Correo Electrónico</label>
-      <input type="email" id="recipientEmail" name="recipientEmail" [(ngModel)]="recipientEmail"
-        placeholder="Ingresa el correo del usuario a enlazar" class="form-control" [disabled]="loading">
-      <small class="form-hint">Introduce el correo electrónico del usuario que deseas enlazar contigo</small>
-    </div>
-
-    <!-- Mensaje de error -->
-    <div *ngIf="errorMessage" class="alert alert-danger">
-      {{ errorMessage }}
-    </div>
-
-    <!-- Mensaje de éxito -->
-    <div *ngIf="successMessage" class="alert alert-success">
-      {{ successMessage }}
-      <div class="spinner-border spinner-border-sm" role="status" *ngIf="loading">
-        <span class="visually-hidden">Redirigiendo...</span>
+      <label for="email">Correo electrónico</label>
+      <input 
+        type="email" 
+        id="email" 
+        name="email"
+        [(ngModel)]="email" 
+        #emailInput="ngModel"
+        required
+        pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
+        placeholder="Ingrese el correo electrónico"
+        [class.is-invalid]="emailInput.invalid && (emailInput.dirty || emailInput.touched)"
+      >
+      <div class="error-message" *ngIf="emailInput.invalid && (emailInput.dirty || emailInput.touched)">
+        <span *ngIf="emailInput.errors?.['required']">El correo electrónico es requerido</span>
+        <span *ngIf="emailInput.errors?.['pattern']">Ingrese un correo electrónico válido</span>
       </div>
     </div>
-
-    <div class="button-group">
-      <button (click)="sendLink()" class="btn btn-primary" [disabled]="loading || !recipientEmail">
-        <span *ngIf="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-        {{ loading ? 'Procesando...' : 'Enlazar Usuario' }}
-      </button>
-
-      <button (click)="resetForm()" class="btn btn-secondary"
-        [disabled]="loading || (!recipientEmail && !errorMessage && !successMessage)">
-        Limpiar
-      </button>
-
-      <button (click)="viewLinkRequests()" class="btn btn-info" [disabled]="loading">
-        Ver Solicitudes
-      </button>
+    
+    <div class="alert alert-danger" *ngIf="errorMessage">
+      {{ errorMessage }}
     </div>
-
-    <div class="info-box">
-      <p><strong>¿Qué es un enlace?</strong></p>
-      <p>Al enlazar con otro usuario, ambos podrán compartir información y acceder a funcionalidades colaborativas.</p>
-      <p>El usuario receptor debe aceptar tu solicitud para establecer el enlace completo.</p>
+    
+    <div class="alert alert-success" *ngIf="successMessage">
+      {{ successMessage }}
     </div>
-  </div>
+    
+    <button 
+      type="submit" 
+      [disabled]="linkForm.invalid || isLoading"
+      class="btn-primary"
+    >
+      <span *ngIf="isLoading">Enviando...</span>
+      <span *ngIf="!isLoading">Enviar solicitud</span>
+    </button>
+  </form>
 </div>
+

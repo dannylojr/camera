@@ -1,127 +1,95 @@
-import { Component, OnInit, inject, OnDestroy } from "@angular/core";
-import { LinkPeopleService } from "../../Services/link-people.service";
-import { AuthService } from "../../Services/auth.service";
-import { Router } from "@angular/router";
-import { NgIf } from "@angular/common";
-import { FormsModule } from "@angular/forms";
-import { CommonModule } from "@angular/common";
-import { finalize } from "rxjs/operators";
-import { Subscription } from "rxjs";
+import { Component, type OnDestroy } from "@angular/core"
+import type { Subscription } from "rxjs"
+import { LinkPeopleService } from "../../Services/link-people.service"
+import { ToastService } from "../../Services/toast.service"
+import { NgIf } from "@angular/common"
+import { FormsModule } from "@angular/forms"
 
 @Component({
   selector: "app-link-people",
-  standalone: true,
-  imports: [CommonModule, NgIf, FormsModule],
+  imports: [NgIf, FormsModule],
   templateUrl: "./link-people.component.html",
-  styleUrls: ["./link-people.component.css"]
+  styleUrls: ["./link-people.component.scss"],
 })
-export class LinkPeopleComponent implements OnInit, OnDestroy {
-  recipientEmail: string = "";
-  errorMessage: string = "";
-  successMessage: string = "";
-  loading: boolean = false;
+export class LinkPeopleComponent implements OnDestroy {
+  // Modelo para el formulario
+  email = ""
 
-  private subscriptions: Subscription[] = [];
-  private linkService = inject(LinkPeopleService);
-  private authService = inject(AuthService);
-  private router = inject(Router);
+  // Estados
+  isLoading = false
+  errorMessage = ""
+  successMessage = ""
 
-  ngOnInit() {
-    // Verificar autenticación al inicializar el componente
-    const authSub = this.authService.user$.subscribe(user => {
-      if (!user) {
-        this.router.navigate(["/login"]);
-      }
-    });
+  // Suscripciones
+  private subscription: Subscription | null = null
 
-    this.subscriptions.push(authSub);
+  constructor(
+    private linkPeopleService: LinkPeopleService,
+    private toastService: ToastService,
+  ) { }
+
+  ngOnDestroy(): void {
+    // Limpiar suscripciones al destruir el componente
+    if (this.subscription) {
+      this.subscription.unsubscribe()
+    }
   }
 
-  ngOnDestroy() {
-    // Limpiar todas las suscripciones
-    this.subscriptions.forEach(sub => sub.unsubscribe());
-  }
+  onSubmit(): void {
+    // Resetear mensajes
+    this.errorMessage = ""
+    this.successMessage = ""
 
-  // Enviar solicitud de enlace usando correo electrónico
-  sendLink() {
-    this.errorMessage = "";
-    this.successMessage = "";
-    this.loading = true;
-
-    if (!this.recipientEmail) {
-      this.errorMessage = "Por favor ingresa el correo electrónico del receptor.";
-      this.loading = false;
-      return;
+    // Validar email
+    if (!this.email || !this.isValidEmail(this.email)) {
+      this.errorMessage = "Por favor, ingresa un correo electrónico válido"
+      return
     }
 
-    // Validar formato de correo electrónico
-    const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    if (!emailPattern.test(this.recipientEmail)) {
-      this.errorMessage = "Por favor ingresa un correo electrónico válido.";
-      this.loading = false;
-      return;
-    }
+    // Establecer estado de carga
+    this.isLoading = true
 
-    // Validar que no sea el mismo usuario
-    const authSub = this.authService.user$.subscribe(user => {
-      if (user?.email === this.recipientEmail) {
-        this.errorMessage = "No puedes enlazarte contigo mismo.";
-        this.loading = false;
-        return;
-      }
+    // Buscar el ID del usuario por email
+    this.subscription = this.linkPeopleService.getUserIdByEmail(this.email).subscribe({
+      next: (userId) => {
+        if (!userId) {
+          this.errorMessage = "No se encontró ningún usuario con ese correo electrónico"
+          this.toastService.showError(this.errorMessage)
+          this.isLoading = false
+          return
+        }
 
-      // Buscar el usuario por correo y enviar la solicitud
-      const emailSub = this.linkService.getUserIdByEmail(this.recipientEmail)
-        .pipe(
-          finalize(() => this.loading = false)
-        )
-        .subscribe({
-          next: (recipientId) => {
-            if (!recipientId) {
-              this.errorMessage = "No se encontró ningún usuario con ese correo electrónico.";
-              return;
-            }
-
-            // Enviar la solicitud con el ID obtenido
-            const linkSub = this.linkService.sendLinkRequest(recipientId)
-              .subscribe({
-                next: () => {
-                  this.successMessage = "Solicitud de enlace enviada correctamente. Esperando aceptación del destinatario.";
-
-                  // Redirigir a la página de solicitudes pendientes
-                  setTimeout(() => {
-                    this.router.navigate(["/link-requests"]);
-                  }, 1500);
-                },
-                error: (error) => {
-                  console.error("Error al enviar el enlace:", error);
-                  this.errorMessage = error.message || "Hubo un error al enviar el enlace. Intenta de nuevo.";
-                }
-              });
-
-            this.subscriptions.push(linkSub);
-          },
-          error: (error) => {
-            console.error("Error al buscar el usuario:", error);
-            this.errorMessage = "Error al buscar el usuario. Verifica el correo e intenta de nuevo.";
-          }
-        });
-
-      this.subscriptions.push(emailSub);
-    });
-
-    this.subscriptions.push(authSub);
+        // Enviar la solicitud de enlace
+        this.sendLinkRequest(userId)
+      },
+      error: (error) => {
+        this.errorMessage = "Error al buscar el usuario: " + (error.message || "Error desconocido")
+        this.toastService.showError(this.errorMessage)
+        this.isLoading = false
+      },
+    })
   }
 
-  // Navegar a la página de solicitudes de enlace
-  viewLinkRequests() {
-    this.router.navigate(["/link-requests"]);
+  private sendLinkRequest(userId: string): void {
+    this.subscription = this.linkPeopleService.sendLinkRequest(userId).subscribe({
+      next: (result) => {
+        this.successMessage = "Solicitud de enlace enviada correctamente"
+        this.toastService.showSuccess(this.successMessage)
+        this.email = "" // Limpiar el formulario
+        this.isLoading = false
+      },
+      error: (error) => {
+        this.errorMessage = error.message || "Error al enviar la solicitud de enlace"
+        this.toastService.showError(this.errorMessage)
+        this.isLoading = false
+      },
+    })
   }
 
-  // Limpiar los campos y mensajes
-  resetForm() {
-    this.recipientEmail = "";
-    this.errorMessage = "";
-    this.successMessage = "";
+  // Validador simple de email
+  private isValidEmail(email: string): boolean {
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+    return emailRegex.test(email)
   }
 }
+

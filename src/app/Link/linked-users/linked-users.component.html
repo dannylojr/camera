@@ -1,51 +1,28 @@
 <div class="linked-users-container">
-  <h2>Usuarios Enlazados</h2>
+  <h2>Usuarios enlazados</h2>
 
-  <!-- Mensajes de éxito y error -->
-  <div *ngIf="successMessage" class="success-message">
-    {{ successMessage }}
+  <div *ngIf="isLoading" class="loading">
+    <span>Cargando usuarios enlazados...</span>
   </div>
 
-  <div *ngIf="errorMessage" class="error-message">
-    {{ errorMessage }}
+  <div *ngIf="!isLoading && linkedUsers.length === 0" class="empty-state">
+    No tienes usuarios enlazados
   </div>
 
-  <div *ngIf="loading" class="loading-indicator">
-    <div class="spinner"></div>
-    <p>Cargando usuarios enlazados...</p>
-  </div>
-
-  <div *ngIf="!loading && linkedUsers.length === 0" class="no-users-message">
-    <div class="empty-icon">👥</div>
-    <p>No tienes usuarios enlazados en este momento.</p>
-    <button (click)="router.navigate(['/link-people'])" class="btn-primary">Enlazar Usuarios</button>
-  </div>
-
-  <div *ngIf="linkedUsers.length > 0" class="user-list">
+  <div *ngIf="!isLoading && linkedUsers.length > 0" class="users-list">
     <div *ngFor="let user of linkedUsers" class="user-card">
       <div class="user-avatar">
-        <img [src]="user.photoURL || '/assets/default-avatar.png'" alt="{{ user.displayName || 'Usuario' }}" />
+        <img [src]="user.photoURL || '/assets/default-avatar.png'" alt="Avatar">
       </div>
+
       <div class="user-info">
         <h3>{{ user.displayName || 'Usuario' }}</h3>
-        <p *ngIf="user.email">{{ user.email }}</p>
+        <p>{{ user.email }}</p>
       </div>
+
       <div class="user-actions">
-        <button (click)="navigateToSharedGallery(user.uid)" class="btn-gallery">
-          <span class="icon">🖼️</span>
-          Galería compartida
-        </button>
-        <button (click)="unlinkUser(user.uid)" class="btn-unlink">
-          <span class="icon">🔗</span>
-          Desenlazar
-        </button>
+        <button class="btn-unlink" (click)="unlinkUser(user.uid)">Desenlazar</button>
       </div>
     </div>
-  </div>
-
-  <div class="actions-container">
-    <button (click)="router.navigate(['/link-people'])" class="btn-primary">Enlazar Más Usuarios</button>
-    <button (click)="router.navigate(['/link-requests'])" class="btn-secondary">Ver Solicitudes</button>
-    <button (click)="router.navigate(['/dashboard'])" class="btn-secondary">Volver al Dashboard</button>
   </div>
 </div>
